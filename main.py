@@ -3,9 +3,9 @@ import pandas as pd
 
 # Configuración de la conexión a Oracle
 DB_CONFIG = {
-    'user': 'hr',
-    'password': 'hr',
-    'dsn': 'localhost:1521/orcl'  # Cambia 'xe' si el servicio es diferente
+    'user': 'hr',               # Usuario de la base de datos
+    'password': 'hr',           # Contraseña del usuario
+    'dsn': 'localhost:1521/orcl'  # Dirección del servicio (host, puerto, servicio)
 }
 
 # Consultas SQL automatizadas como lista de cadenas
@@ -78,23 +78,29 @@ QUERIES = [
 ]
 
 def execute_query(query):
-    """Ejecuta una consulta SQL y devuelve los resultados como un DataFrame."""
+    """
+    Ejecuta una consulta SQL y devuelve los resultados como un DataFrame.
+    :param query: Cadena con la consulta SQL.
+    :return: DataFrame con los resultados de la consulta.
+    """
     with oracledb.connect(**DB_CONFIG) as connection:
         cursor = connection.cursor()
         cursor.execute(query)
-        columns = [col[0] for col in cursor.description]  # Nombres de columnas
-        rows = cursor.fetchall()  # Filas
+        columns = [col[0] for col in cursor.description]  # Obtiene los nombres de las columnas
+        rows = cursor.fetchall()  # Obtiene los resultados de la consulta
         return pd.DataFrame(rows, columns=columns)
 
 def main():
-    """Ejecuta todas las consultas y las almacena en una lista de DataFrames."""
-    dataframes = []
+    """
+    Ejecuta todas las consultas en la lista QUERIES y muestra los resultados.
+    """
+    dataframes = []  # Lista para almacenar los resultados de cada consulta
     for i, query in enumerate(QUERIES):
         print(f"\nEjecutando consulta {i + 1}:")
         try:
-            df = execute_query(query)
-            dataframes.append(df)
-            print(df)
+            df = execute_query(query)  # Ejecuta la consulta
+            dataframes.append(df)  # Agrega el DataFrame a la lista
+            print(df)  # Imprime los resultados en consola
         except Exception as e:
             print(f"Error ejecutando la consulta {i + 1}: {e}")
             dataframes.append(None)  # Si falla, añade None para mantener el orden
